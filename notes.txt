@@ -1,4 +1,7 @@
 - keybow-python : https://github.com/pimoroni/keybow-python
   - Doesn't install its dependencies: RPi.GPIO and spidev
 
+20210524:
+  - got initial bits working, taking the opportunity to properly learn things about asyncio in python.
+
 

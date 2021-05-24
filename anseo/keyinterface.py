@@ -1,5 +1,6 @@
 
 import enum
+import asyncio
 import importlib
 
 
@@ -96,6 +97,7 @@ class KeyInterface(object):
         self._handlers = None
         self._last_show = None
         self._keybow = None
+        self._last_press = None
 
         if self._impl == Implementation.KEYBOW:
             try:
@@ -108,14 +110,16 @@ class KeyInterface(object):
             self._state[k] = KeyState()
         if self._impl == Implementation.KEYBOW:
             self._keybow.setup(self._keybow.MINI)
+
             def _handler(idx, state):
-                print ('%d %s' % (idx, 'pressed' if state else 'released'))
                 self.update(idx, state)
+
             for idx in range(keycount):
                 self._handler = self._keybow.on(index=idx, handler=_handler)
 
     def update(self, idx, state):
         self._state[idx].pressed = state
+        self._last_press = (idx, state)
 
     def show(self):
         if self._impl == Implementation.KEYBOW:
@@ -132,3 +136,10 @@ class KeyInterface(object):
         for k in self._state:
             self._state[k].clear()
 
+    async def async_wait(self):
+        while True:
+            last = self._last_press
+            if last:
+                self._last_press = None
+                return last
+            await asyncio.sleep(1.0 / 120.0)

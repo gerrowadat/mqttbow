@@ -1,15 +1,28 @@
-import time
+import asyncio
 from anseo import keyinterface
 
 
-def main():
+async def listen_keys(queue):
     ki = keyinterface.KeyInterface(keyinterface.Implementation.KEYBOW)
     ki.setup(keycount=3)
 
     while True:
+        keypress = await ki.async_wait()
         ki.show()
-        time.sleep(1.0 / 60.0)
+        await queue.put(keypress)
+
+
+async def print_keys(queue):
+    while True:
+        keypress = await queue.get()
+        print(keypress)
+
+
+async def main():
+    q = asyncio.Queue()
+    await listen_keys(q)
+    await print_keys(q)
 
 
 if __name__ == '__main__':
-    main()
+    asyncio.run(main())
