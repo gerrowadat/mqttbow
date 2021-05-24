@@ -2,19 +2,9 @@ import time
 from anseo import keyinterface
 
 
-def key_handler(idx, state):
-    print("{}: Key {} has been {}".format(
-        time.time(),
-        idx,
-        'pressed' if state else 'released'))
-
-
 def main():
     ki = keyinterface.KeyInterface(keyinterface.Implementation.KEYBOW)
-    ki.setup()
-    # keybow mini so 3 keys
-    for k in range(3):
-        ki.set_handler(k,key_handler)
+    ki.setup(keycount=3)
 
     while True:
         ki.show()

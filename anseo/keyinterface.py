@@ -31,6 +31,12 @@ class KeyState(object):
     def pressed(self):
         return self._pressed
 
+    @pressed.setter
+    def pressed(self, var):
+        if var not in (True, False):
+            raise KeyStateError('pressed must be True/False, not %s' % (type(var), ))
+        self._pressed = var
+
     def down(self):
         self._pressed = True
 
@@ -86,7 +92,7 @@ class KeyState(object):
 class KeyInterface(object):
     def __init__(self, impl=Implementation.KEYBOW):
         self._impl = impl
-        self._state = []
+        self._state = {}
         self._handlers = None
         self._last_show = None
         self._keybow = None
@@ -97,9 +103,19 @@ class KeyInterface(object):
             except ModuleNotFoundError:
                 raise KeyInterfaceError('keybow python module not installed')
 
-    def setup(self):
+    def setup(self, keycount=3):
+        for k in range(keycount):
+            self._state[k] = KeyState()
         if self._impl == Implementation.KEYBOW:
             self._keybow.setup(self._keybow.MINI)
+            def _handler(idx, state):
+                print ('%d %s' % (idx, 'pressed' if state else 'released'))
+                self.update(idx, state)
+            for idx in range(keycount):
+                self._handler = self._keybow.on(index=idx, handler=_handler)
+
+    def update(self, idx, state):
+        self._state[idx].pressed = state
 
     def show(self):
         if self._impl == Implementation.KEYBOW:
@@ -116,9 +132,3 @@ class KeyInterface(object):
         for k in self._state:
             self._state[k].clear()
 
-    def set_handler(self, index, handler, state=None):
-        if self._impl == Implementation.KEYBOW:
-            self._handler = self._keybow.on(index=index, handler=handler)
-        elif self._impl == Implementation.SIMULATED:
-            # we cheat a little here by passing in the state along with the handler
-            self._handler = handler
