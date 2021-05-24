@@ -1,0 +1,15 @@
+import time
+from anseo import keyinterface
+
+
+def main():
+    ki = keyinterface.KeyInterface(keyinterface.Implementation.SIMULATED)
+    ki.setup()
+
+    while True:
+        ki.show()
+        time.sleep(1.0 / 60.0)
+
+
+if __name__ == '__main__':
+    main()
