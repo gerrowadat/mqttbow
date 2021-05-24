@@ -1,5 +1,6 @@
 
 import enum
+import importlib
 
 
 class KeyInterfaceError(Exception):
@@ -86,22 +87,23 @@ class KeyInterface(object):
     def __init__(self, impl=Implementation.KEYBOW):
         self._impl = impl
         self._state = []
-        self._handler = None
+        self._handlers = None
         self._last_show = None
+        self._keybow = None
 
         if self._impl == Implementation.KEYBOW:
             try:
-                import keybow
+                self._keybow = importlib.import_module('keybow')
             except ModuleNotFoundError:
                 raise KeyInterfaceError('keybow python module not installed')
 
     def setup(self):
         if self._impl == Implementation.KEYBOW:
-            keybow.setup()
+            self._keybow.setup(self._keybow.MINI)
 
     def show(self):
         if self._impl == Implementation.KEYBOW:
-            keybow.show()
+            self._keybow.show()
         elif self._impl == Implementation.SIMULATED:
             if self._state != self._last_show:
                 self._last_show = self._state
@@ -110,13 +112,13 @@ class KeyInterface(object):
 
     def clear(self):
         if self._impl == Implementation.KEYBOW:
-            keybow.clear()
+            self._keybow.clear()
         for k in self._state:
             self._state[k].clear()
 
-    def set_handler(self, handler, state=None):
+    def set_handler(self, index, handler, state=None):
         if self._impl == Implementation.KEYBOW:
-            self._handler = keybow.on(handler)
+            self._handler = self._keybow.on(index=index, handler=handler)
         elif self._impl == Implementation.SIMULATED:
             # we cheat a little here by passing in the state along with the handler
             self._handler = handler
