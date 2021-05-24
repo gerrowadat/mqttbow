@@ -1,0 +1,4 @@
+- keybow-python : https://github.com/pimoroni/keybow-python
+  - Doesn't install its dependencies: RPi.GPIO and spidev
+
+
