@@ -79,7 +79,12 @@ class KeyState(object):
 
     @property
     def colourcode(self):
-        return '%s%s%s' % (self.r, self.g, self.b)
+        return '%s%s%s' % (format(self.r, '02x'), format(self.g, '02x'), format(self.b, '02x'))
+
+    def set_colour(self, r, g, b):
+        self.r = r
+        self.g = g
+        self.b = b
 
     def clear(self):
         self.r = 0
@@ -119,14 +124,19 @@ class KeyInterface(object):
                 self._keybow.setup(self._keybow.MINI)
 
             def _handler(idx, state):
-                self.update(idx, state)
+                self.key_update(idx, state)
 
             for idx in range(keycount):
                 self._handler = self._keybow.on(index=idx, handler=_handler)
 
-    def update(self, idx, state):
+    def key_update(self, idx, state):
         self._state[idx].pressed = state
         self._last_press = (idx, state)
+
+    def set_led(self, idx, r, g, b):
+        if self._impl == Implementation.KEYBOW:
+            self._keybow.set_led(idx, r, g, b)
+        self._state[idx].set_colour(r, g, b)
 
     def show(self):
         if self._impl == Implementation.KEYBOW:
@@ -165,8 +175,8 @@ class KeyInterface(object):
             if op == 'sleep':
                 await asyncio.sleep(arg)
             elif op == 'down':
-                self.update(arg, True)
+                self.key_update(arg, True)
                 return (arg, True)
             elif op == 'up':
-                self.update(arg, False)
+                self.key_update(arg, False)
                 return (arg, False)
