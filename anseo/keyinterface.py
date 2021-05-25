@@ -98,6 +98,8 @@ class KeyInterface(object):
         self._last_show = None
         self._keybow = None
         self._last_press = None
+        self._script = []
+        self._script_position = 0
 
         if self._impl == Implementation.KEYBOW:
             try:
@@ -105,11 +107,16 @@ class KeyInterface(object):
             except ModuleNotFoundError:
                 raise KeyInterfaceError('keybow python module not installed')
 
-    def setup(self, keycount=3):
+    def setup(self, keycount=3, script=None):
+        if script:
+            self._script = script
         for k in range(keycount):
             self._state[k] = KeyState()
         if self._impl == Implementation.KEYBOW:
-            self._keybow.setup(self._keybow.MINI)
+            if keycount not in (3, 12):
+                raise KeyInterfaceError('keycount must be 12 (or 3 for mini)')
+            if keycount == 3:
+                self._keybow.setup(self._keybow.MINI)
 
             def _handler(idx, state):
                 self.update(idx, state)
@@ -124,11 +131,8 @@ class KeyInterface(object):
     def show(self):
         if self._impl == Implementation.KEYBOW:
             self._keybow.show()
-        elif self._impl == Implementation.SIMULATED:
-            if self._state != self._last_show:
-                self._last_show = self._state
-                for k in self._state:
-                    print('[%d %s]\n' % (k, str(self._state[k])))
+        for k in self._state:
+            print('[%d %s]' % (k, str(self._state[k])))
 
     def clear(self):
         if self._impl == Implementation.KEYBOW:
@@ -137,9 +141,32 @@ class KeyInterface(object):
             self._state[k].clear()
 
     async def async_wait(self):
-        while True:
-            last = self._last_press
-            if last:
-                self._last_press = None
-                return last
-            await asyncio.sleep(1.0 / 120.0)
+        if self._impl == Implementation.KEYBOW:
+            while True:
+                last = self._last_press
+                if last:
+                    self._last_press = None
+                    return last
+                await asyncio.sleep(1.0 / 120.0)
+        elif self._impl == Implementation.SIMULATED:
+            # Run through the script
+            if self._script_position >= len(self._script):
+                print('script completed')
+                self.show()
+                # wait a long time, which is good enough for testing purposes.
+                await asyncio.sleep(99999999)
+
+            cmd = self._script[self._script_position]
+            self._script_position += 1
+
+            print('script cmd: %s' % (cmd, ))
+            (op, arg) = cmd.split()
+            arg = int(arg)
+            if op == 'sleep':
+                await asyncio.sleep(arg)
+            elif op == 'down':
+                self.update(arg, True)
+                return (arg, True)
+            elif op == 'up':
+                self.update(arg, False)
+                return (arg, False)

@@ -3,8 +3,17 @@ from anseo import keyinterface
 
 
 async def listen_keys(queue):
-    ki = keyinterface.KeyInterface(keyinterface.Implementation.KEYBOW)
-    ki.setup(keycount=3)
+    ki = keyinterface.KeyInterface(keyinterface.Implementation.SIMULATED)
+
+    script = [
+        'sleep 1',
+        'down 1',
+        'sleep 2',
+        'up 1',
+        'down 0'
+    ]
+
+    ki.setup(script=script)
 
     while True:
         keypress = await ki.async_wait()
