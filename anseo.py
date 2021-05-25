@@ -20,9 +20,10 @@ async def print_keys(queue):
 
 async def main():
     q = asyncio.Queue()
-    await listen_keys(q)
-    await print_keys(q)
+    await asyncio.gather(listen_keys(q), print_keys(q))
 
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(main())
+    loop.close()
