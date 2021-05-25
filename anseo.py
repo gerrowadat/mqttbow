@@ -24,7 +24,8 @@ async def listen_keys(queue):
 async def print_keys(queue):
     while True:
         keypress = await queue.get()
-        print(keypress)
+        if keypress:
+            print('Key %d %s' % (keypress[0], 'down' if keypress[1] else 'up'))
 
 
 async def main():
