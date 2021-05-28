@@ -9,6 +9,10 @@ class KeyInterfaceError(Exception):
     pass
 
 
+class LEDInterfaceError(KeyInterfaceError):
+    pass
+
+
 class KeySequenceListenerError(Exception):
     pass
 
@@ -279,7 +283,7 @@ class LEDCommand(object):
 
     @r.setter
     def r(self, val):
-        if not isinstance(int, val) or val < 0 or val > 255 :
+        if not isinstance(int, val) or val < 0 or val > 255:
             raise LEDInterfaceError('value of r must be an int 0 < r < 255')
         self._r = val
 
@@ -289,7 +293,7 @@ class LEDCommand(object):
 
     @g.setter
     def g(self, val):
-        if not isinstance(int, val) or val < 0 or val > 255 :
+        if not isinstance(int, val) or val < 0 or val > 255:
             raise LEDInterfaceError('value of g must be an int 0 < r < 255')
         self._r = val
 
@@ -299,7 +303,7 @@ class LEDCommand(object):
 
     @b.setter
     def b(self, val):
-        if not isinstance(int, val) or val < 0 or val > 255 :
+        if not isinstance(int, val) or val < 0 or val > 255:
             raise LEDInterfaceError('value of b must be an int 0 < r < 255')
         self._r = val
 

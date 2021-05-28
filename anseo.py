@@ -5,7 +5,6 @@ from anseo import keyinterface
 async def process_keystrokes(ki, key_q):
     while True:
         keypress = await key_q.get()
-        print ('got kp: %s' % (keypress, ))
         if keypress:
             print('Key %d %s' % (keypress))
             if keypress[1] == keyinterface.KeySequence.SINGLE:
