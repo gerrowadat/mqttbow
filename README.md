@@ -1,3 +1,4 @@
+[![Flake8 linter Actions Status](https://github.com/gerrowadat/anseo/workflows/Flake8%20linter/badge.svg)](https://github.com/gerrowadat/anseo/actions)
 # anseo
 A presence/activity indicator using keybow. Nothing (for now) to see here).
 
