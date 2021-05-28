@@ -2,29 +2,25 @@ import asyncio
 from anseo import keyinterface
 
 
-async def listen_keys(ki, key_q):
-    while True:
-        keypress = await ki.async_wait()
-        ki.show()
-        await key_q.put(keypress)
-
-
 async def light_keys(ki, led_q):
     while True:
         action = await led_q.get()
-        print ('setting led: %s' % (str(action)))
+        print('setting led: %s' % (str(action)))
         ki.set_led(*action)
         ki.show()
+
 
 async def process_keystrokes(key_q, led_q):
     while True:
         keypress = await key_q.get()
         if keypress:
-            print('Key %d %s' % (keypress[0], 'down' if keypress[1] else 'up'))
-            if keypress[1]:
+            print('Key %d %s' % (keypress))
+            if keypress[1] == keyinterface.KeySequence.SINGLE:
                 await led_q.put((keypress[0], 255, 0, 0), )
-            else:
-                await led_q.put((keypress[0], 0, 0, 0), )
+            elif keypress[1] == keyinterface.KeySequence.HOLD:
+                await led_q.put((keypress[0], 0, 255, 0), )
+            await asyncio.sleep(0.2)
+            await led_q.put((keypress[0], 0, 0, 0), )
 
 
 async def main():
@@ -32,18 +28,20 @@ async def main():
     led_q = asyncio.Queue()
     ki = keyinterface.KeyInterface(keyinterface.Implementation.SIMULATED)
 
-
     script = [
-        'sleep 1',
         'down 1',
-        'sleep 2',
+        'sleep 0.2',
         'up 1',
-        'down 0'
+        'down 0',
+        'sleep 0.6',
+        'up 0'
     ]
 
     ki.setup(script=script)
 
-    await asyncio.gather(listen_keys(ki, key_q), light_keys(ki, led_q), process_keystrokes(key_q, led_q))
+    seq_l = keyinterface.KeySequenceListener(ki, listen_for=[keyinterface.KeySequence.SINGLE, keyinterface.KeySequence.HOLD])
+
+    await asyncio.gather(seq_l.produce(key_q), light_keys(ki, led_q), process_keystrokes(key_q, led_q))
 
 
 if __name__ == '__main__':

@@ -1,10 +1,15 @@
-
+import time
 import enum
 import asyncio
 import importlib
+from collections import deque
 
 
 class KeyInterfaceError(Exception):
+    pass
+
+
+class KeySequenceListenerError(Exception):
     pass
 
 
@@ -171,12 +176,54 @@ class KeyInterface(object):
 
             print('script cmd: %s' % (cmd, ))
             (op, arg) = cmd.split()
-            arg = int(arg)
+            arg = float(arg)
             if op == 'sleep':
                 await asyncio.sleep(arg)
+                return await self.async_wait()
             elif op == 'down':
                 self.key_update(arg, True)
                 return (arg, True)
             elif op == 'up':
                 self.key_update(arg, False)
                 return (arg, False)
+
+
+class KeySequence(enum.Enum):
+    SINGLE = 1
+    HOLD = 2
+    DOUBLE = 3
+
+
+class KeySequenceListener(object):
+    def __init__(self, interface, listen_for=[KeySequence.SINGLE]):
+        """Listen for sequences of keypresses.
+            listen_for: (list) list of seqwucne types to listen for.
+            interface: (KeyInterface) a post-setup() KeyInterface.
+        """
+        self._listen_for = listen_for
+        if not isinstance(interface, KeyInterface):
+            raise KeySequenceListenerError('interface must be KeyInterface instance')
+        self._ki = interface
+        self._tl = deque([None for x in range(50)], 50)  # A timeline of events in (timestamp: event) format.
+
+    async def produce(self, q):
+        """Listen for and enqueue key sequences.
+            q: (asnycio.Queue) A queue to push sequences onto
+        """
+        while True:
+            result = []
+            keypress = await self._ki.async_wait()
+            # keypress is (key_index, bool) where True is on key down.
+            if not keypress[1]:  # key up...
+                # See if this was a press or a hold (if we care):
+                key_history = [kp for kp in list(self._tl) if kp and kp[1][0] == keypress[0]]
+                last_action = key_history[0]
+                if last_action:
+                    press_duration = (time.time() - last_action[0]) * 1000
+                    if press_duration > 500 and KeySequence.HOLD in self._listen_for:
+                        result = (keypress[0], KeySequence.HOLD)
+                    else:
+                        result = (keypress[0], KeySequence.SINGLE)
+
+            self._tl.appendleft((time.time(), keypress),)
+            await q.put(result)
