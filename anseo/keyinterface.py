@@ -18,12 +18,12 @@ class KeyStateError(KeyInterfaceError):
 
 
 class Implementation(enum.Enum):
-    # Actually usee the keybow
-    KEYBOW = 1
+    # Actually use the keybow
+    KEYBOW = enum.auto()
     # Do a simulated set of things, once.
-    SIMULATED = 2
+    SIMULATED = enum.auto()
     # Don't do anything
-    DUMMY = 3
+    DUMMY = enum.auto()
 
 
 class KeyState(object):
@@ -142,6 +142,7 @@ class KeyInterface(object):
         if self._impl == Implementation.KEYBOW:
             self._keybow.set_led(idx, r, g, b)
         self._state[idx].set_colour(r, g, b)
+        self.show()
 
     def show(self):
         if self._impl == Implementation.KEYBOW:
@@ -154,6 +155,16 @@ class KeyInterface(object):
             self._keybow.clear()
         for k in self._state:
             self._state[k].clear()
+
+    def _from_hexcode(self, code):
+        return (int(code[0:2], 16), int(code[2:4], 16), int(code[4:6]))
+
+    async def led_on(self, key_idx, hexcode):
+        (r, g, b) = self._from_hexcode(hexcode)
+        self.set_led(key_idx, r, g, b)
+
+    async def led_off(self, key_idx):
+        self.set_led(key_idx, 0, 0, 0)
 
     async def async_wait(self):
         if self._impl == Implementation.KEYBOW:
@@ -221,9 +232,81 @@ class KeySequenceListener(object):
                 if last_action:
                     press_duration = (time.time() - last_action[0]) * 1000
                     if press_duration > 500 and KeySequence.HOLD in self._listen_for:
-                        result = (keypress[0], KeySequence.HOLD)
+                        result = (int(keypress[0]), KeySequence.HOLD)
                     else:
-                        result = (keypress[0], KeySequence.SINGLE)
+                        result = (int(keypress[0]), KeySequence.SINGLE)
 
             self._tl.appendleft((time.time(), keypress),)
             await q.put(result)
+
+
+class LEDOperation(enum.Enum):
+    OFF = enum.auto()
+    ON = enum.auto()
+    BLINK = enum.auto()
+
+
+class LEDCommand(object):
+    def __init__(self, key_idx, op=LEDOperation.BLINK, r=0, g=0, b=0, blink_count=1):
+        self._key_idx = key_idx
+        self._op = op
+        self._r = r
+        self._g = g
+        self._b = b
+        self._blink_count = blink_count
+
+    @property
+    def key_idx(self):
+        return self._key_idx
+
+    @key_idx.setter
+    def key_idx(self, val):
+        self._key_idx = val
+
+    @property
+    def op(self):
+        return self._op
+
+    @op.setter
+    def op(self, val):
+        if val not in LEDOperation:
+            raise LEDInterfaceError('value of op must be in LEDOperation')
+        self._op = val
+
+    @property
+    def r(self):
+        return self._r
+
+    @r.setter
+    def r(self, val):
+        if not isinstance(int, val) or val < 0 or val > 255 :
+            raise LEDInterfaceError('value of r must be an int 0 < r < 255')
+        self._r = val
+
+    @property
+    def g(self):
+        return self._g
+
+    @g.setter
+    def g(self, val):
+        if not isinstance(int, val) or val < 0 or val > 255 :
+            raise LEDInterfaceError('value of g must be an int 0 < r < 255')
+        self._r = val
+
+    @property
+    def b(self):
+        return self._b
+
+    @b.setter
+    def b(self, val):
+        if not isinstance(int, val) or val < 0 or val > 255 :
+            raise LEDInterfaceError('value of b must be an int 0 < r < 255')
+        self._r = val
+
+    @property
+    def blink_count(self):
+        return self._blink_count
+
+    @blink_count.setter
+    def blink_count(self, val):
+        self._blink_count = val
