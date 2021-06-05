@@ -1,25 +1,25 @@
 import asyncio
 import logging
+from anseo import config
 from anseo import keyinterface
 
 
-async def process_keystrokes(ki, key_q):
+async def process_keystrokes(cf, ki, key_q):
     while True:
         keypress = await key_q.get()
         if keypress:
-            logging.debug('Key %d %s' % (keypress))
-            if keypress[1] == keyinterface.KeySequence.SINGLE:
-                await ki.led_on(keypress[0], 'ff0000')
-            elif keypress[1] == keyinterface.KeySequence.HOLD:
-                await ki.led_on(keypress[0], '00ff00')
-            await asyncio.sleep(0.2)
-            await ki.led_off(keypress[0])
+            (hook_class, hook_args) = cf.get_hook(keypress[0], keypress[1].name)
+            if hook_class:
+                hook_obj = hook_class()
+                await hook_obj.run(ki, hook_args)
 
 
 async def main():
     logging.basicConfig(level=logging.DEBUG)
     key_q = asyncio.Queue()
     ki = keyinterface.KeyInterface(keyinterface.Implementation.SIMULATED)
+    cf = config.Config()
+    cf.Load(filename="example_config.cf")
 
     script = [
         'down 1',
@@ -34,7 +34,7 @@ async def main():
 
     seq_l = keyinterface.KeySequenceListener(ki, listen_for=[keyinterface.KeySequence.SINGLE, keyinterface.KeySequence.HOLD])
 
-    await asyncio.gather(seq_l.produce(key_q), process_keystrokes(ki, key_q))
+    await asyncio.gather(seq_l.produce(key_q), process_keystrokes(cf, ki, key_q))
 
 
 if __name__ == '__main__':

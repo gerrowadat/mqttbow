@@ -1,0 +1,7 @@
+
+class AnseoConfig(Config):
+    HOOKS = [
+        (0, 'SINGLE', plugins.Print, {'msg': 'Button 0 Pressed'}),
+        (0, 'HOLD', plugins.Led, {'op': 'on', 'key': 0, 'colour': '0000ff'}),
+    ]
+

@@ -162,7 +162,7 @@ class KeyInterface(object):
             self._state[k].clear()
 
     def _from_hexcode(self, code):
-        return (int(code[0:2], 16), int(code[2:4], 16), int(code[4:6]))
+        return (int(code[0:2], 16), int(code[2:4], 16), int(code[4:6], 16))
 
     async def led_on(self, key_idx, hexcode):
         (r, g, b) = self._from_hexcode(hexcode)
