@@ -5,3 +5,5 @@
   - got initial bits working, taking the opportunity to properly learn things about asyncio in python.
 
 
+20210605:
+  - basic config and plugins done. Should be able to do something useful soon.
