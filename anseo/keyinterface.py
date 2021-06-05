@@ -1,6 +1,7 @@
 import time
 import enum
 import asyncio
+import logging
 import importlib
 from collections import deque
 
@@ -152,7 +153,7 @@ class KeyInterface(object):
         if self._impl == Implementation.KEYBOW:
             self._keybow.show()
         for k in self._state:
-            print('[%d %s]' % (k, str(self._state[k])))
+            logging.debug('[%d %s]' % (k, str(self._state[k])))
 
     def clear(self):
         if self._impl == Implementation.KEYBOW:
@@ -181,7 +182,7 @@ class KeyInterface(object):
         elif self._impl == Implementation.SIMULATED:
             # Run through the script
             if self._script_position >= len(self._script):
-                print('script completed')
+                logging.info('script completed')
                 self.show()
                 # wait a long time, which is good enough for testing purposes.
                 await asyncio.sleep(99999999)
@@ -189,7 +190,7 @@ class KeyInterface(object):
             cmd = self._script[self._script_position]
             self._script_position += 1
 
-            print('script cmd: %s' % (cmd, ))
+            logging.debug('script cmd: %s' % (cmd, ))
             (op, arg) = cmd.split()
             arg = float(arg)
             if op == 'sleep':

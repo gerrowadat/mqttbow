@@ -1,4 +1,5 @@
 import asyncio
+import logging
 from anseo import keyinterface
 
 
@@ -6,7 +7,7 @@ async def process_keystrokes(ki, key_q):
     while True:
         keypress = await key_q.get()
         if keypress:
-            print('Key %d %s' % (keypress))
+            logging.debug('Key %d %s' % (keypress))
             if keypress[1] == keyinterface.KeySequence.SINGLE:
                 await ki.led_on(keypress[0], 'ff0000')
             elif keypress[1] == keyinterface.KeySequence.HOLD:
@@ -16,6 +17,7 @@ async def process_keystrokes(ki, key_q):
 
 
 async def main():
+    logging.basicConfig(level=logging.DEBUG)
     key_q = asyncio.Queue()
     ki = keyinterface.KeyInterface(keyinterface.Implementation.SIMULATED)
 
