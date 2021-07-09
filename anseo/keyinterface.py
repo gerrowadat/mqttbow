@@ -186,7 +186,7 @@ class KeyInterface(object):
 
     async def all_leds_off(self):
         for idx in self._state:
-            self.set_led(key_idx, 0, 0, 0)
+            self.set_led(idx, 0, 0, 0)
 
     async def async_wait(self):
         if self._impl == Implementation.KEYBOW:
