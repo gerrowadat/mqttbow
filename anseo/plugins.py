@@ -37,3 +37,7 @@ class Led(Plugin):
 
         if args['op'] == 'on':
             await ki.led_on(args['key'], args['colour'])
+
+        if args['op'] == 'toggle':
+            await ki.led_toggle(args['key'], args['colour'])
+

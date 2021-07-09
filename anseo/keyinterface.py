@@ -96,6 +96,11 @@ class KeyState(object):
         self.g = g
         self.b = b
 
+    def is_lit(self):
+        if self.r == self.g == self.b == 0:
+            return False
+        return True
+
     def clear(self):
         self.r = 0
         self.g = 0
@@ -167,6 +172,14 @@ class KeyInterface(object):
     async def led_on(self, key_idx, hexcode):
         (r, g, b) = self._from_hexcode(hexcode)
         self.set_led(key_idx, r, g, b)
+
+    async def led_toggle(self, key_idx, hexcode=None):
+        if self._state[key_idx].is_lit():
+            await self.led_off(key_idx)
+        else:
+            if not hexcode:
+                raise LEDInterfaceError('cannot toggle LED %d to on without hexcode' % (key_idx, ))
+            await self.led_on(key_idx, hexcode)
 
     async def led_off(self, key_idx):
         self.set_led(key_idx, 0, 0, 0)
