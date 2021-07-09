@@ -1,3 +1,4 @@
+import sys
 import asyncio
 import logging
 from anseo import config
@@ -17,9 +18,22 @@ async def process_keystrokes(cf, ki, key_q):
 async def main():
     logging.basicConfig(level=logging.DEBUG)
     key_q = asyncio.Queue()
-    ki = keyinterface.KeyInterface(keyinterface.Implementation.SIMULATED)
     cf = config.Config()
-    cf.Load(filename="example_config.cf")
+
+    if len(sys.argv) == 2:
+        cf.Load(filename=sys.argv[1])
+    else:
+        cf.Load(filename="example_config.cf")
+
+    if cf.KEY_IMPLEMENTATION:
+        try:
+            impl = getattr(keyinterface.Implementation, cf.KEY_IMPLEMENTATION)
+        except AttributeError:
+            print('No such KeyInterface implementation: %s' % (cf.KEY_IMPLEMENTATION))
+            sys.exit(1)
+        ki = keyinterface.KeyInterface(impl)
+    else:
+        ki = keyinterface.KeyInterface(keyinterface.Implementation.KEYBOW)
 
     script = [
         'down 1',

@@ -1,5 +1,6 @@
 
 class AnseoConfig(Config):
+    KEY_IMPLEMENTATION = 'SIMULATED'
     HOOKS = [
         (0, 'SINGLE', plugins.Print, {'msg': 'Button 0 Pressed'}),
         (0, 'HOLD', plugins.Led, {'op': 'toggle', 'key': 0, 'colour': '0000ff'}),

@@ -8,6 +8,7 @@ class AnseoConfigError(Exception):
 
 class Config(object):
     HOOKS = []
+    KEY_IMPLEMENTATION = None
 
     def get_hook(self, key, action):
         hooks = [h for h in self.HOOKS if h[0] == key and h[1] == action]
@@ -33,7 +34,11 @@ class Config(object):
             if len(config_objs) != 1:
                 raise AnseoConfigError('config file must have exactly 1 config.Config subclass')
             self.HOOKS = config_objs[0].HOOKS
+            if hasattr(config_objs[0], 'KEY_IMPLEMENTATION'):
+                self.KEY_IMPLEMENTATION = config_objs[0].KEY_IMPLEMENTATION
         if obj:
             if Config not in obj.mro():
                 raise AnseoConfigError('config object passed must be a config.Config subclass')
             self.HOOKS = obj.HOOKS
+            if hasattr(obj, 'KEY_IMPLEMENTATION'):
+                self.KEY_IMPLEMENTATION = obj.KEY_IMPLEMENTATION
