@@ -16,7 +16,6 @@ async def process_keystrokes(ki, mqtt, base_topic, key_q):
             await mqtt.publish(topic, payload.encode('ascii'))
 
 
-
 async def main():
     logging.basicConfig(level=logging.DEBUG)
     parser = argparse.ArgumentParser()
@@ -26,7 +25,6 @@ async def main():
     parser.add_argument('--mqtt_user', default=None, help='MQTT user')
     parser.add_argument('--mqtt_pass', default=None, help='MQTT password')
     args = parser.parse_args()
-
 
     # Setup the keybow interface (or simulation).
     if args.implementation == 'keybow':
@@ -49,7 +47,6 @@ async def main():
     ki.setup(script=script)
 
     seq_l = asynckeybow.KeySequenceListener(ki, listen_for=[asynckeybow.KeySequence.SINGLE, asynckeybow.KeySequence.HOLD])
-
 
     # Set up the MQTT Publisher
     mqtt = MQTTClient()

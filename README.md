@@ -1,4 +1,4 @@
-[![Flake8 linter Actions Status](https://github.com/gerrowadat/anseo/workflows/Flake8%20linter/badge.svg)](https://github.com/gerrowadat/anseo/actions)
+[![Flake8 linter Actions Status](https://github.com/gerrowadat/mqttbow/workflows/Flake8%20linter/badge.svg)](https://github.com/gerrowadat/mqttbow/actions)
 # anseo
 An MQTT client for the pimoroni keybow. Also a handy mocking hook for the keybow that's stuck in there somehow.
 
