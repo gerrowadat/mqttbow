@@ -1,6 +1,6 @@
 [![Flake8 linter Actions Status](https://github.com/gerrowadat/anseo/workflows/Flake8%20linter/badge.svg)](https://github.com/gerrowadat/anseo/actions)
 # anseo
-A presence/activity indicator using keybow. Nothing (for now) to see here).
+An MQTT client for the pimoroni keybow. Also a handy mocking hook for the keybow that's stuck in there somehow.
 
 Shopping list:
   - Raspberry Pi Model Zero (the last hassle is getting the WH model which has wifi and headers already on).
