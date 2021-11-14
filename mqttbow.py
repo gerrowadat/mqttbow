@@ -4,6 +4,7 @@ import logging
 import argparse
 import asynckeybow
 from hbmqtt.client import MQTTClient, ConnectException
+from hbmqtt.mqtt.constants import QOS_1
 
 
 async def process_keystrokes(ki, mqtt, base_topic, key_q):
@@ -14,6 +15,13 @@ async def process_keystrokes(ki, mqtt, base_topic, key_q):
             payload = str(time.time())
             logging.debug('MQTT Publish: [%s]: %s' % (topic, payload))
             await mqtt.publish(topic, payload.encode('ascii'))
+
+
+async def process_mqtt(ki, mqtt):
+    while True:
+        mqtt_msg = await mqtt.deliver_message()
+        pkt = mqtt_msg.publish_packet
+        print("%s => %s" % (pkt.variable_header.topic_name, str(pkt.payload.data)))
 
 
 async def main():
@@ -64,9 +72,11 @@ async def main():
         logging.error('Error connecting to MQTT broker: %s' % str(e))
         return
 
+    await mqtt.subscribe([('%s#' % (args.mqtt_topic), QOS_1)])
+
     key_q = asyncio.Queue()
 
-    await asyncio.gather(seq_l.produce(key_q), process_keystrokes(ki, mqtt, args.mqtt_topic, key_q))
+    await asyncio.gather(seq_l.produce(key_q), process_keystrokes(ki, mqtt, args.mqtt_topic, key_q), process_mqtt(ki, mqtt))
 
 
 if __name__ == '__main__':
