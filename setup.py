@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="mqttbow",
-    version="0.0.1",
+    version="0.0.2",
     author="Dave O'Connor",
     author_email="doc+git@gerrup.eu",
     url='https://github.com/gerrowadat/mqttbow',
