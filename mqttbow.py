@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from anseo import keyinterface
+import asynckeybow
 
 
 async def process_keystrokes(ki, key_q):
@@ -14,8 +14,8 @@ async def main():
     logging.basicConfig(level=logging.DEBUG)
     key_q = asyncio.Queue()
 
-    # ki = keyinterface.KeyInterface(keyinterface.Implementation.KEYBOW)
-    ki = keyinterface.KeyInterface(keyinterface.Implementation.SIMULATED)
+    # ki = asynckeybow.KeyInterface(asynckeybow.Implementation.KEYBOW)
+    ki = asynckeybow.KeyInterface(asynckeybow.Implementation.SIMULATED)
 
     script = [
         'down 1',
@@ -28,7 +28,7 @@ async def main():
 
     ki.setup(script=script)
 
-    seq_l = keyinterface.KeySequenceListener(ki, listen_for=[keyinterface.KeySequence.SINGLE, keyinterface.KeySequence.HOLD])
+    seq_l = asynckeybow.KeySequenceListener(ki, listen_for=[asynckeybow.KeySequence.SINGLE, asynckeybow.KeySequence.HOLD])
 
     await asyncio.gather(seq_l.produce(key_q), process_keystrokes(ki, key_q))
 
